@@ -17,8 +17,8 @@ df['date'] = pd.to_datetime(df['date'], format='mixed', dayfirst=False)
 
 date_range = pd.date_range(start=df["date"].min(), end=df["date"].max())
 complete_dates = pd.DataFrame(date_range, columns=["date"])
-df_by_date = df.groupby("date").agg({"transaction_amount": ["count"]}).reset_index()
-df_by_date.columns = ["date", "item_name"]
+df_by_date = df.groupby("date").agg({"transaction_amount": ["sum"]}).reset_index()
+df_by_date.columns = ["date", "transaction_amount"]
 df_complete = pd.merge(complete_dates, df_by_date, on="date", how="left")
 df_complete.fillna(0, inplace=True)
 
@@ -31,7 +31,7 @@ df_test = df_complete.iloc[train_size:]
 
 metrics = []
 model = auto_arima(
-    df_train['item_name'],
+    df_train['transaction_amount'],
     seasonal=False, 
     trace=True, 
     error_action='ignore', 
@@ -40,14 +40,18 @@ model = auto_arima(
 test_predictions = model.predict(n_periods=len(df_test)).values
 df_test["auto_arima_pred"] = test_predictions
 plt.figure(figsize=(14, 6))
-sns.lineplot(data=df_train, y="item_name", x="date", label="Train")
-sns.lineplot(data=df_test, y="item_name", x="date", label="Test")
+sns.lineplot(data=df_train, y="transaction_amount", x="date", label="Train")
+sns.lineplot(data=df_test, y="transaction_amount", x="date", label="Test")
 sns.lineplot(data=df_test, y="auto_arima_pred", x="date", label="Auto Arima Predictions")
-plt.title('SARIMA')
+plt.title('AUTO ARIMA')
 plt.grid()
 plt.ylim(0)
 
 plt.savefig("auto-arima.png", dpi=300)
-mae = mean_absolute_error(df_test["item_name"], test_predictions)
+mae = mean_absolute_error(df_test["transaction_amount"], test_predictions)
 metrics.append({"model": "Auto ARIMA", "mae": mae})
 print(f'Mean Absolute Error: {mae}')
+
+# Save result to CSV 
+result_df = pd.DataFrame([{"model": "AUTO ARIMA", "mae": mae}])
+result_df.to_csv("result.csv", mode='a', header=not pd.io.common.file_exists("result.csv"), index=False)

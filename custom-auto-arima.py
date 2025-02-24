@@ -17,8 +17,8 @@ df['date'] = pd.to_datetime(df['date'], format='mixed', dayfirst=False)
 
 date_range = pd.date_range(start=df["date"].min(), end=df["date"].max())
 complete_dates = pd.DataFrame(date_range, columns=["date"])
-df_by_date = df.groupby("date").agg({"transaction_amount": ["count"]}).reset_index()
-df_by_date.columns = ["date", "item_name"]
+df_by_date = df.groupby("date").agg({"transaction_amount": ["sum"]}).reset_index()
+df_by_date.columns = ["date", "transaction_amount"]
 df_complete = pd.merge(complete_dates, df_by_date, on="date", how="left")
 df_complete.fillna(0, inplace=True)
 
@@ -30,11 +30,11 @@ df_train = df_complete.iloc[:train_size]
 df_test = df_complete.iloc[train_size:]
 
 metrics = []
-train_data, val_data = train_test_split(df_train['item_name'], test_size=0.2, shuffle=False)
+train_data, val_data = train_test_split(df_train['transaction_amount'], test_size=0.2, shuffle=False)
 
-p_values = range(0, 6)
+p_values = range(0, 11)
 d_values = range(0, 2)
-q_values = range(0, 6)
+q_values = range(0,11)
 
 tmp_metrics = []
 
@@ -60,21 +60,24 @@ best_params = tmp_results_df.loc[tmp_results_df['mae'].idxmin()]
 print(f'Best parameters: {best_params["model"]}, MAE: {best_params["mae"]}')
 
 p_best, d_best, q_best = map(int, best_params["model"][6:-1].split(","))
-best_model = ARIMA(df_train['item_name'], order=(p_best, d_best, q_best))
+best_model = ARIMA(df_train['transaction_amount'], order=(p_best, d_best, q_best))
 best_model_fit = best_model.fit()
 
 test_predictions = model_fit.forecast(steps=len(df_test)).values
 df_test["custom_auto_arima_pred"] = test_predictions
 plt.figure(figsize=(14, 6))
-sns.lineplot(data=df_train, y="item_name", x="date", label="Train")
-sns.lineplot(data=df_test, y="item_name", x="date", label="Test")
+sns.lineplot(data=df_train, y="transaction_amount", x="date", label="Train")
+sns.lineplot(data=df_test, y="transaction_amount", x="date", label="Test")
 sns.lineplot(data=df_test, y="custom_auto_arima_pred", x="date", label="custom_auto_arima_pred")
-plt.title('SARIMA')
+plt.title('CUSTOM AUTO ARIMA')
 plt.grid()
 plt.ylim(0)
 
-plt.savefig("cauto-sarima.png", dpi=300)
-mae = mean_absolute_error(df_test["item_name"], test_predictions)
+plt.savefig("custom-auto-arima.png", dpi=300)
+mae = mean_absolute_error(df_test["transaction_amount"], test_predictions)
 metrics.append({"model": "Custom Auto ARIMA", "mae": mae})
 print(df_test)
 print(f'Mean Absolute Error: {mae}')
+
+result_df = pd.DataFrame([{"model": "CUSTOM AUTO ARIMA", "mae": mae}])
+result_df.to_csv("result.csv", mode='a', header=not pd.io.common.file_exists("result.csv"), index=False)
