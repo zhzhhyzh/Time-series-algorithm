@@ -4,18 +4,18 @@ This repository contains various time-series forecasting models, each implemente
 
 ## Repository Structure
 
-time-series-algorithm/
-├── overview.py        # Generates an overview plot of the dataset (overview.png)
-├── evaluate.py        # Evaluates the results from different models (results.csv)
-├── arima.py          # Implementation of ARIMA
-├── sarima.py          # Implementation of SARIMA
-├── auto-arima.py          # Implementation of Auto ARIMA
-├── auto-sarima.py          # Implementation of Auto SARIMA
-├── custom-auto-arima.py          # Implementation of Custom Auto ARIMA
-├── lightGBM.py          # Implementation of LightGBM
-├── xgb.py          # Implementation of XGBoost
-├── results.csv         # CSV file containing the forecasting results from each model
-└── README.md          # This file--- 
+time-series-algorithm/ <br>
+├── overview.py        # Generates an overview plot of the dataset (overview.png) <br>
+├── evaluate.py        # Evaluates the results from different models (results.csv) <br>
+├── arima.py          # Implementation of ARIMA <br>
+├── sarima.py          # Implementation of SARIMA <br>
+├── auto-arima.py          # Implementation of Auto ARIMA <br>
+├── auto-sarima.py          # Implementation of Auto SARIMA <br>
+├── custom-auto-arima.py          # Implementation of Custom Auto ARIMA <br>
+├── lightGBM.py          # Implementation of LightGBM <br>
+├── xgb.py          # Implementation of XGBoost <br>
+└── results.csv         # CSV file containing the forecasting results from each model <br>
+
 
 ## ⚡ Usage
 
